@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="460" viewBox="0 0 800 460">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="oklch(0.6959 0.1491 162.4796)"/><stop offset="1" stop-color="oklch(0.5081 0.1049 165.6121)"/></linearGradient></defs>
+  <path fill="url(#bg)" d="M0 0h800v460H0z"/>
+  <g fill="none" stroke="oklch(0.9505 0.0507 163.0508)" stroke-width="1" opacity=".35"><circle cx="560" cy="235" r="210"/><circle cx="560" cy="235" r="180"/><circle cx="560" cy="235" r="150"/><circle cx="560" cy="235" r="120"/></g>
+  <path fill="oklch(0.9514 0.0250 236.8242)" d="m570 38 25 90 80-48-47 82 92 24-92 24 47 82-80-48-25 90-25-90-80 48 47-82-92-24 92-24-47-82 80 48z"/>
+  <path fill="oklch(0.4318 0.0865 166.9128)" d="M582 282c-23-23-60-23-83 0l-51 51c-23 23-23 60 0 83s60 23 83 0l51-51c23-23 23-60 0-83Zm-63 65c-8-8-8-21 0-29s21-8 29 0 8 21 0 29-21 8-29 0Z"/>
+  <path fill="oklch(0.7227 0.1920 149.5793)" d="M716 294h30v144h-30zM659 351h144v30H659z" transform="rotate(25 731 366)"/>
+  <g fill="#fff" font-family="Arial, sans-serif"><text x="54" y="75" font-size="17" letter-spacing="5">MÚSICA · ARTE · ENCUENTROS</text><text x="49" y="177" font-size="65" font-weight="800">FESTIVAL</text><text x="49" y="244" font-size="65" font-weight="800">DE LOS</text><text x="49" y="311" font-size="65" font-weight="800">SENTIDOS.</text><text x="54" y="404" font-size="19" letter-spacing="2">19 DIC 2026 / CARACAS</text></g>
+</svg>
