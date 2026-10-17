@@ -70,3 +70,11 @@ src/features/checkout/
 ```
 
 Al desplegar, configura el hosting para servir `index.html` en rutas como `/pago` y `/confirmacion`. Para añadir componentes: `npx shadcn@latest add nombre-del-componente`.
+
+## Producción TicketYa
+
+El workflow `.github/workflows/ticketya-production.yml` valida y construye cada candidato, con `VITE_TICKET_API_BASE_URL=https://api-tickets.prestaya-latam.com` al compilar. Un push/merge a main publica el artefacto identificado por SHA y encola su versión. El rol solo publica el prefijo plugin; no puede ejecutar shell, leer secretos del runtime ni desplegar PrestaYa.
+
+El host TicketYa activa los estáticos de forma atómica en la ventana diaria04:00 Bolivia o mediante el ejecutor manual autorizado, con la misma exclusión y comprobación de base. Sin candidato pendiente no cambia el servicio. Un despliegue manual consumido no se repite en la siguiente ventana.
+
+URL elegida: `https://plugin.prestaya-latam.com`, sujeta a completar DNS/TLS. La disponibilidad del backend, acceso común, portal de cuotas y habilitación productiva dependen de las entregas reales de meteor-stack-core; desplegar este plugin no completa esas funciones ni habilita cobros. Los padres iframe se autorizan exactamente por onboarding; por defecto quedan cerrados.

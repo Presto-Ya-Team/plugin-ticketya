@@ -1,0 +1,63 @@
+name: TicketYa plugin production
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ticketya-plugin-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify-build:
+    runs-on: ubuntu-24.04
+    env:
+      VITE_TICKET_API_BASE_URL: https://api-tickets.prestaya-latam.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Package deterministic static artifact
+        run: |
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf dist.tgz -C dist .
+          sha256sum dist.tgz > dist.tgz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ticketya-plugin-${{ github.sha }}
+          path: |
+            dist.tgz
+            dist.tgz.sha256
+          retention-days: 14
+  publish:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: verify-build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ticketya-plugin-${{ github.sha }}
+      - name: Verify exact artifact
+        run: sha256sum -c dist.tgz.sha256
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::040084234234:role/ticketya-production-plugin-publish
+          aws-region: us-east-1
+      - name: Publish and enqueue verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: python3 scripts/publish-production.py

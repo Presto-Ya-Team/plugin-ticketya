@@ -1,0 +1,77 @@
+name: TicketYa plugin build (draft)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact reviewed plugin commit (40 hexadecimal characters)
+        required: true
+        type: string
+      api_origin:
+        description: Public HTTPS Meteor API origin, no credentials
+        default: https://api-tickets.prestaya-latam.com
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ticketya-plugin-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'Presto-Ya-Team/plugin-ticketya'
+    runs-on: ubuntu-24.04
+    env:
+      EXPECTED_SHA: ${{ inputs.source_sha }}
+      VITE_TICKET_API_BASE_URL: ${{ inputs.api_origin }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Validate candidate and public configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          node --input-type=module <<'JS'
+          const value = process.env.VITE_TICKET_API_BASE_URL;
+          const url = new URL(value);
+          if (url.protocol !== 'https:' || url.username || url.password
+            || url.search || url.hash || url.pathname !== '/') {
+            throw new Error('Configure a public HTTPS API origin without credentials or path');
+          }
+          JS
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify plugin
+        run: |
+          npm run lint
+          npm run build
+      - name: Record build provenance
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import { writeFileSync } from 'node:fs';
+          writeFileSync('dist/ticketya-build.json', JSON.stringify({
+            sourceSha: process.env.EXPECTED_SHA,
+            apiOrigin: process.env.VITE_TICKET_API_BASE_URL,
+            runId: process.env.GITHUB_RUN_ID,
+          }, null, 2) + '\n');
+          JS
+          find dist -type f -print0 | sort -z | xargs -0 sha256sum > ticketya-artifact-sha256.txt
+          mv ticketya-artifact-sha256.txt dist/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ticketya-checkout-${{ inputs.source_sha }}
+          path: dist/
+          retention-days: 14
+          if-no-files-found: error
