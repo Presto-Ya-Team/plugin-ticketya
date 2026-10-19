@@ -1,5 +1,5 @@
 import { Check, RefreshCw } from "lucide-react";
-import { Navigate, useLocation } from "react-router";
+import { Link, Navigate, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,6 +52,7 @@ function Confirmation({ order, token }: { order: TicketOrder; token: string }) {
           ? "Recibimos tu pago, pero el calendario necesita revisión porque cambió respecto del aceptado. Conservamos las condiciones de tu cotización; soporte debe resolverlo antes de continuar."
           : "Tu calendario fue validado con la fecha del pago. Esta confirmación corresponde al sandbox de BCP; la emisión de la entrada se gestiona por separado."}
       </p>
+      <Button asChild className="mb-3 h-12 w-full rounded-xl"><Link to="/mis-cuotas" target="_blank" rel="noopener noreferrer">Ver mis cuotas</Link></Button>
       <Button
         variant="outline"
         className="h-12 w-full rounded-xl bg-card"

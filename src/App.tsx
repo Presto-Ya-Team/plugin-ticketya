@@ -25,11 +25,13 @@ const ConfirmationPage = lazy(() =>
     default: module.ConfirmationPage,
   })),
 );
+const BuyerPortal = lazy(() => import("@/features/buyer/buyer-portal").then(module => ({ default: module.BuyerPortal })));
 
 function Layout() {
   const { pathname, search } = useLocation();
   const token = new URLSearchParams(search).get("session");
   const paymentPath = token ? checkoutPath(token) : "/pago";
+  const inPortal = pathname.startsWith("/mis-cuotas");
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
@@ -38,7 +40,7 @@ function Layout() {
       <header className="border-b bg-card">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-5 sm:px-8">
           <Link
-            to={paymentPath}
+            to={inPortal ? "/mis-cuotas" : paymentPath}
             aria-label="Ticketya Cuotas, inicio"
             className="flex items-center gap-2.5"
           >
@@ -53,6 +55,7 @@ function Layout() {
             </span>
           </Link>
           <div className="flex items-center gap-2 sm:gap-4">
+            <Button asChild variant={inPortal ? "secondary" : "ghost"} size="sm"><Link to="/mis-cuotas" target={inPortal ? undefined : "_blank"} rel="noopener noreferrer" aria-current={inPortal ? "page" : undefined}>Mis cuotas</Link></Button>
             <Badge
               variant="secondary"
               className="hidden gap-1.5 sm:inline-flex"
@@ -111,6 +114,7 @@ function Layout() {
       <Routes>
         <Route path="/" element={<Navigate to={paymentPath} replace />} />
         <Route path="/pago" element={<CheckoutPage />} />
+        <Route path="/mis-cuotas/:orderId?" element={<Suspense fallback={<p role="status" className="px-6 py-20 text-center">Cargando tus cuotas…</p>}><BuyerPortal /></Suspense>} />
         <Route
           path="/confirmacion"
           element={

@@ -50,9 +50,40 @@ El diálogo muestra estados de carga, espera, QR vencido, error o revisión. Un 
 
 **BCP debe estar configurado, verificado y activo en Meteor.** Si está deshabilitado o faltan credenciales/certificado, se muestra el error de configuración sin QR alternativo. La prueba contra el banco se hará después de desplegar en staging con BCP sandbox, callback público HTTPS y sus secretos. Estas rutas permanecen bloqueadas en producción. La configuración actual de BCP admite anticipos de Bs 1 a Bs 1.000; las órdenes antiguas sin anticipo requieren una nueva cotización para usar este cobro.
 
-El token se conserva entre pago y confirmación y no se guarda en localStorage. Una sesión vencida requiere un nuevo enlace; no hay renovación automática ni portal permanente para las cuotas posteriores. Este QR es de cobro bancario, no de acceso al evento: la emisión de entradas queda pendiente.
+El token se conserva entre pago y confirmación y no se guarda en localStorage. Una sesión de checkout vencida requiere un nuevo enlace. Las compras con pagos registrados se consultan por separado en `/mis-cuotas`, con acceso por correo. Este QR es de cobro bancario, no de acceso al evento: la emisión de entradas queda pendiente.
 
 El checkout muestra una cuenta regresiva `mm:ss` basada en `expiresAt`, sin reiniciar los 30 minutos al recargar o cambiar de paso. En móvil, el temporizador y la acción principal de cada paso están en una barra fija inferior con espacio para el área segura del dispositivo. En escritorio, el contador aparece arriba y los botones permanecen dentro del contenido. El diálogo del QR también muestra el tiempo del enlace; al vencer la sesión se cierra el flujo de pago.
+
+## Portal del comprador de Plugin TicketYa
+
+Abre `/mis-cuotas`, o usa «Mis cuotas» en la cabecera. Ingresa el correo utilizado
+en la compra y el código de seis dígitos enviado a esa dirección. La sesión se
+recupera al recargar; vence a los siete días y permite salir explícitamente.
+No se guardan códigos/tokens en localStorage ni en URLs.
+
+El portal muestra las compras con al menos un pago confirmado, sus entradas,
+saldo y calendario con cuotas pagadas, pendientes y vencidas. Tiene detalle por
+compra en `/mis-cuotas/:orderId`, paginación, lista vacía y recuperación de errores.
+No depende del token de checkout ni calcula condiciones nuevas. «Pagar cuota»
+abre el importe/fecha de la siguiente cuota pendiente; la generación del QR queda
+para la próxima integración. No simula pagos ni marca cuotas como pagadas.
+
+Consume `/api/v1/ticket-buyer/{code,verify,session,orders}` del backend aislado
+en Meteor, con cookies HttpOnly y CORS del origen exacto. Para desarrollo:
+`VITE_BUYER_API_BASE_URL=http://localhost:3131`; si no se define, hereda
+`VITE_TICKET_API_BASE_URL` (o 3131 cuando tampoco existe esa variable en local).
+Usa el mismo hostname en ambos servidores. Al compilar producción hereda la URL
+pública de la API, sin añadir secretos al frontend.
+
+El backend necesita correo configurado: modo `local` solo en desarrollo, leyendo
+el archivo privado del código, o SES con remitente/rol propios verificados. El
+frontend no implementa códigos de prueba ni datos ficticios; si falta configurar
+el servidor, muestra que el acceso todavía no está disponible. El contrato y las
+variables están en `meteor-stack-core/docs/ticketya/plugin-buyer-portal.md`.
+
+Desde el checkout se abre el portal en otra pestaña para que el login no dependa
+de cookies de terceros dentro del iframe. El portal pertenece a **Plugin TicketYa**;
+es distinto del acceso de operadores y de la otra aplicación llamada TicketYa.
 
 ## Estructura
 
@@ -69,7 +100,10 @@ src/features/checkout/
   checkout-utils.ts          Formatos BOB/Bolivia y validación del comprador
 ```
 
-Al desplegar, configura el hosting para servir `index.html` en rutas como `/pago` y `/confirmacion`. Para añadir componentes: `npx shadcn@latest add nombre-del-componente`.
+El portal está en `src/features/buyer/`: `buyer-api.ts` (contratos/acceso),
+`buyer-plan.ts` (estados de cuotas) y `buyer-portal.tsx` (login/compras/detalle).
+
+Al desplegar, configura el hosting para servir `index.html` en `/pago`, `/confirmacion` y `/mis-cuotas/*`. El Caddy actual ya aplica este fallback. Para añadir componentes: `npx shadcn@latest add nombre-del-componente`.
 
 ## Producción TicketYa
 
