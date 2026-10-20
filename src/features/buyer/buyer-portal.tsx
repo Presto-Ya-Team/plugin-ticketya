@@ -15,6 +15,7 @@ import { money, shortDate } from "@/features/checkout/checkout-utils";
 import { payableTotal, type TicketOrder } from "@/features/checkout/order-api";
 import { BuyerError, buyerCodeSchema, buyerEmailSchema, getBuyerOrder, getBuyerOrders, getBuyerSession, logoutBuyer, sendBuyerCode, verifyBuyerCode, type BuyerChallenge, type BuyerSession } from "./buyer-api";
 import { buyerPayments, nextBuyerPayment } from "./buyer-plan";
+import { BuyerQr } from './buyer-qr';
 
 const message = (error: unknown) => error instanceof BuyerError ? error.message : "Ocurrió un problema. Intenta nuevamente.";
 function Notice({ children }: { children: React.ReactNode }) { return <p role="alert" className="rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive">{children}</p>; }
@@ -55,7 +56,7 @@ export function BuyerPortal() {
         <Button variant="outline" disabled={loggingOut} onClick={() => void logout()}><LogOut className="size-4" />{loggingOut ? "Cerrando…" : "Salir"}</Button>
       </div>
       {error && <div className="mb-6"><Notice>{error}</Notice></div>}
-      {orderId ? <PurchaseDetail key={`${session.email}:${orderId}`} orderId={orderId} expired={expired} /> : <Purchases key={session.email} expired={expired} />}
+      {orderId ? <PurchaseDetail key={`${session.email}:${orderId}`} orderId={orderId} expired={expired} csrfToken={session.csrfToken} /> : <Purchases key={session.email} expired={expired} />}
     </> : <>
       {error && <div className="mx-auto mb-6 max-w-md space-y-3"><Notice>{error}</Notice><Button variant="ghost" onClick={() => { setLoading(true); setError(""); setRetry(value => value + 1); }}><RefreshCw className="size-4" />Reintentar conexión</Button></div>}
       <BuyerLogin onLogin={value => { setError(""); setSession(value); }} />
@@ -140,7 +141,7 @@ function Purchases({ expired }: { expired: () => void }) {
   </div>{cursor && <div className="text-center"><Button variant="outline" disabled={loading} onClick={() => { setLoading(true); setBefore(cursor); }}>{loading ? "Cargando…" : "Cargar más compras"}</Button></div>}</div>;
 }
 
-function PurchaseDetail({ orderId, expired }: { orderId: string; expired: () => void }) {
+function PurchaseDetail({ orderId, expired, csrfToken }: { orderId: string; expired: () => void; csrfToken: string }) {
   const [order, setOrder] = useState<TicketOrder>();
   const [error, setError] = useState(""); const [retry, setRetry] = useState(0);
   const [paymentNumber, setPaymentNumber] = useState<number | null>(null);
@@ -161,7 +162,7 @@ function PurchaseDetail({ orderId, expired }: { orderId: string; expired: () => 
       <section aria-labelledby="buyer-schedule"><h2 id="buyer-schedule" className="mb-4 text-lg font-semibold">Tus cuotas</h2><Card className="py-0 shadow-none"><CardContent className="p-0"><ol className="divide-y">
         {payments.map(payment => <li key={payment.number} className="flex flex-wrap items-center gap-3 p-5 sm:gap-4 sm:p-6"><span className={`flex size-10 shrink-0 items-center justify-center rounded-full ${payment.status === "PAID" ? "bg-accent text-primary" : "bg-muted text-muted-foreground"}`}>{payment.status === "PAID" ? <Check className="size-5" /> : <Clock3 className="size-5" />}</span><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{payment.label}</p><time dateTime={payment.dueAt} className="mt-1 block text-xs text-muted-foreground">{shortDate(payment.dueAt, order.event.timeZone)}</time></div><div className="text-right"><p className="font-semibold">{money(payment.amountMinor)}</p><p className={`mt-1 text-xs ${payment.overdue ? "text-destructive" : "text-muted-foreground"}`}>{payment.status === "PAID" ? "Pagada" : payment.overdue ? "Vencida" : "Pendiente"}</p></div>{payment.number === next?.number && order.status !== "PAYMENT_REVIEW_REQUIRED" && order.outstandingAmountMinor > 0 && <Button className="ml-auto w-full sm:w-auto" onClick={() => setPaymentNumber(payment.number)}><QrCode className="size-4" />Pagar cuota</Button>}</li>)}
       </ol></CardContent></Card></section>
-      <Dialog open={!!selected} onOpenChange={open => { if (!open) setPaymentNumber(null); }}><DialogContent><DialogHeader><DialogTitle>{selected?.label}</DialogTitle><DialogDescription>{order.event.name}</DialogDescription></DialogHeader>{selected && <div className="space-y-5"><div className="rounded-xl bg-muted p-5 text-center"><p className="text-xs text-muted-foreground">Importe de esta cuota</p><p className="mt-2 text-3xl font-bold">{money(selected.amountMinor)}</p><p className="mt-2 text-sm text-muted-foreground">Vencimiento: {shortDate(selected.dueAt, order.event.timeZone)}</p></div><p className="text-sm leading-6 text-muted-foreground">El pago con QR estará disponible próximamente. Tu cuota sigue pendiente hasta que se confirme el pago.</p><Button disabled className="w-full"><QrCode className="size-4" />QR próximamente</Button></div>}</DialogContent></Dialog>
+      <Dialog open={!!selected} onOpenChange={open => { if (!open) setPaymentNumber(null); }}><DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md"><DialogHeader><DialogTitle>{selected?.label}</DialogTitle><DialogDescription>{order.event.name}</DialogDescription></DialogHeader>{selected && <BuyerQr key={`${orderId}:${selected.number}`} orderId={orderId} installment={selected.number} amountMinor={selected.amountMinor} csrfToken={csrfToken} expired={expired} confirmed={updated => { setOrder(updated); setPaymentNumber(null); }} />}</DialogContent></Dialog>
     </>}
   </div>;
 }

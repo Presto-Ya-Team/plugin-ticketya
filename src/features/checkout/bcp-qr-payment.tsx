@@ -77,9 +77,9 @@ export function BcpQrPayment({ amountMinor, token, buyer, termsVersion, expiresA
     </Button></DialogTrigger>
     <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
       <DialogHeader className="items-center pt-3 text-center">
-        <Badge variant="secondary">BCP · Sandbox</Badge>
+        <Badge variant="secondary">BCP{result?.environment === "sandbox" ? " · Pruebas" : ""}</Badge>
         <DialogTitle className="text-xl">Paga tu anticipo</DialogTitle>
-        <DialogDescription>Solicitamos el QR a BCP en su ambiente de pruebas. El pago se confirmará al verificarlo con el banco.</DialogDescription>
+        <DialogDescription>El pago se confirmará cuando recibamos la verificación del banco.</DialogDescription>
       </DialogHeader>
       <SessionCountdown expiresAt={expiresAt} className="mx-auto w-fit" />
       <div className="space-y-4 text-center">

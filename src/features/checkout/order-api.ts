@@ -95,8 +95,8 @@ export function checkoutPath(token: string) {
   return `/pago?${new URLSearchParams({ session: token })}`;
 }
 
-const paymentResponseSchema = z.object({
-  provider: z.literal("BCP"), environment: z.literal("sandbox"), order: ticketOrderSchema,
+export const paymentResponseSchema = z.object({
+  provider: z.literal("BCP"), environment: z.enum(["sandbox", "production"]), order: ticketOrderSchema,
   payment: z.object({
     paymentOrderId: z.string().min(1),
     status: z.enum(["requested", "processing", "qr_ready", "paid", "expired", "cancelled", "failed", "review_required"]),

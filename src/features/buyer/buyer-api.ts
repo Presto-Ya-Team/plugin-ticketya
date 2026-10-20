@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ticketOrderSchema } from "@/features/checkout/order-api";
+import { ticketOrderSchema, paymentResponseSchema } from "@/features/checkout/order-api";
 
 export const buyerEmailSchema = z.object({ email: z.string().trim().max(254).pipe(z.email("Escribe un correo válido.")) });
 export const buyerCodeSchema = z.object({ code: z.string().regex(/^\d{6}$/, "Escribe el código de 6 dígitos.") });
@@ -19,7 +19,7 @@ async function request<T>(path: string, schema: z.ZodType<T>, options: RequestIn
   const base = import.meta.env.VITE_BUYER_API_BASE_URL ?? import.meta.env.VITE_TICKET_API_BASE_URL
     ?? (import.meta.env.DEV ? "http://localhost:3131" : "");
   if (!base) throw new BuyerError("El acceso a tus cuotas todavía no está disponible.");
-  const timeout = AbortSignal.timeout(15_000);
+  const timeout = AbortSignal.timeout(path.includes('/installments/') ? 40_000 : 15_000);
   let response: Response;
   try {
     response = await fetch(`${base.replace(/\/$/, "")}/api/v1/ticket-buyer${path}`, {
@@ -52,3 +52,6 @@ export const logoutBuyer = (csrfToken: string) => request("/session", z.null(), 
 });
 export const getBuyerOrders = (signal: AbortSignal, before?: string) => request(`/orders${before ? `?${new URLSearchParams({ before })}` : ""}`, ordersSchema, { signal });
 export const getBuyerOrder = (id: string, signal: AbortSignal) => request(`/orders/${encodeURIComponent(id)}`, orderSchema, { signal });
+export const getBuyerPayment = (id: string, installment: number, signal: AbortSignal) => request(`/orders/${encodeURIComponent(id)}/installments/${installment}/payment`, paymentResponseSchema, { signal });
+export const createBuyerPayment = (id: string, installment: number, csrfToken: string, signal: AbortSignal) => request(`/orders/${encodeURIComponent(id)}/installments/${installment}/payment-qr`, paymentResponseSchema,
+  { method: 'POST', headers: { 'content-type': 'application/json', 'x-csrf-token': csrfToken }, body: '{}', signal });

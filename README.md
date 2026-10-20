@@ -37,7 +37,7 @@ El checkout muestra el anticipo más las n cuotas, precios original y vigente, c
 
 Las fechas son previstas hasta confirmar el anticipo. Meteor las valida con la fecha bancaria sin cambiar las condiciones aceptadas: consolida el calendario si coincide o registra el pago y deja la orden en revisión si necesita cambios.
 
-## Pago del anticipo mediante BCP sandbox
+## Pago del anticipo mediante BCP
 
 1. Revisar el plan y su timeline.
 2. Completar los datos del comprador y aceptar el plan. Se guardan en Meteor al solicitar el QR, junto con la versión y la huella de las condiciones aceptadas.
@@ -49,6 +49,13 @@ Las fechas son previstas hasta confirmar el anticipo. Meteor las valida con la f
 El diálogo muestra estados de carga, espera, QR vencido, error o revisión. Un resultado incierto no crea otro cobro automáticamente. Meteor continúa procesando las notificaciones aunque el cliente cierre la pestaña o venza el enlace. Un calendario diferente del aceptado queda para revisión sin cambiar importes ni fechas silenciosamente.
 
 **BCP debe estar configurado, verificado y activo en Meteor.** Si está deshabilitado o faltan credenciales/certificado, se muestra el error de configuración sin QR alternativo. La prueba contra el banco se hará después de desplegar en staging con BCP sandbox, callback público HTTPS y sus secretos. Estas rutas permanecen bloqueadas en producción. La configuración actual de BCP admite anticipos de Bs 1 a Bs 1.000; las órdenes antiguas sin anticipo requieren una nueva cotización para usar este cobro.
+
+El runtime separado del plugin usa el servicio central de Meteor mediante un
+consumidor privado, con correlación por orden/cuota, respuestas firmadas y
+recuperación persistente de confirmaciones. Las variables `PLUGIN_PAYMENTS_*`
+pertenecen al backend; no se agregan a Vite. Configuración y prueba tras despliegue:
+`meteor-stack-core/docs/ticketya/central-payments.md`. La interfaz muestra «Pruebas»
+solo cuando el servicio informa `sandbox`.
 
 El token se conserva entre pago y confirmación y no se guarda en localStorage. Una sesión de checkout vencida requiere un nuevo enlace. Las compras con pagos registrados se consultan por separado en `/mis-cuotas`, con acceso por correo. Este QR es de cobro bancario, no de acceso al evento: la emisión de entradas queda pendiente.
 
@@ -65,8 +72,9 @@ El portal muestra las compras con al menos un pago confirmado, sus entradas,
 saldo y calendario con cuotas pagadas, pendientes y vencidas. Tiene detalle por
 compra en `/mis-cuotas/:orderId`, paginación, lista vacía y recuperación de errores.
 No depende del token de checkout ni calcula condiciones nuevas. «Pagar cuota»
-abre el importe/fecha de la siguiente cuota pendiente; la generación del QR queda
-para la próxima integración. No simula pagos ni marca cuotas como pagadas.
+solicita el QR de la siguiente cuota pendiente y consulta su confirmación cada
+cinco segundos. Solo actualiza la compra cuando el backend registra el pago.
+Los cobros vencidos o inciertos se consultan sin regenerarlos automáticamente.
 
 Consume `/api/v1/ticket-buyer/{code,verify,session,orders}` del backend aislado
 en Meteor, con cookies HttpOnly y CORS del origen exacto. Para desarrollo:
