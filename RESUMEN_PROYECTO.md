@@ -1,5 +1,7 @@
 # Plugin TicketYa: resumen del proyecto, cambios y decisiones
 
+> Actualización productiva del20/10/2026: ver [estado efectivo, accesos y pendientes](https://github.com/Presto-Ya-Team/meteor-stack-core/blob/main/docs/ticketya/production-config-completion-2026-10-20.md). La última sección de este resumen actualiza las fotografías históricas de configuración pendiente. Las funcionalidades comerciales pendientes se conservan.
+
 Fecha de corte: **20 de octubre de 2026**.
 
 Este documento reúne el trabajo realizado en la conversación, su implementación actual y las decisiones que todavía requieren definición comercial o comprobación en producción. Las pruebas locales y la existencia de código no equivalen a una integración activada en la nube.
@@ -468,4 +470,21 @@ El frontend incluye además su [README](README.md). Para implementar la siguient
 
 Se añadió `/backoffice/ticketeras` como interfaz mínima de las API de operadores existentes: ingreso federado con contraseña/MFA, listado, alta de tiqueteras por admin y salida del plugin. Requiere grant exclusivo `plugin-ticketya` (aplicación/tenant/ambiente exactos). No concede principal de PrestaYa. El operador inicial tiene operations+admin solo en ese scope. Credenciales de tiqueteras aparecen una vez, sin almacenamiento persistente en el navegador.
 
-Guía y scripts personales/administrativos: `meteor-stack-core/docs/ticketya/operator-production-guide.md`. El frontend sigue usando únicamente `VITE_TICKET_API_BASE_URL`; ningún secreto del runtime va en Vite. El despliegue técnico permite configurar la infraestructura conservando cerradas las operaciones financieras y `/health/ready` con sus bloqueos pendientes.
+Guía y scripts personales/administrativos: `meteor-stack-core/docs/ticketya/operator-production-guide.md`. El frontend sigue usando únicamente `VITE_TICKET_API_BASE_URL`; ningún secreto del runtime va en Vite. La entrega inicial de producción está desplegada con schema7 y política inicial del desarrollador (2% por cuota, máximo3); `/health/ready` devuelve200 con dependencias reales disponibles. Esto no acredita pruebas bancarias ni condiciones comerciales definitivas.
+
+
+## 18. Configuración productiva verificada — 20/10/2026
+
+| Punto original | Estado efectivo |
+| --- | --- |
+| 1. Accesos | Autoridad canónica y grants propios configurados. Diego tiene grant explícito del plugin; Fabricio tiene invitación privada lista, pendiente de contraseña y MFA personales. Fabricio no obtiene principal PrestaYa. |
+| 2. Core | Aplicación/tenant activos, registro/ACK reales, NATS privado con TLS y consumidor propio; administración del stream compartido denegada. |
+| 3. BCP | Consumidor de pagos de producción conectado al motor/callback central existente. Readiness verificada; no se hizo QR, compra ni prueba bancaria real. |
+| 4. Correo | Variables Resend reales del backend y remitente configurados; adaptador conectado al proceso independiente. No se envió correo real de prueba. |
+| 5. Tiqueteras | Reserva, notificación, entrega de entrada y liquidación siguen pendientes de producto/desarrollo. |
+| 6. Condiciones | Política inicial explícita de200bps/máximo3/versionINITIAL_PRODUCTION_2PCT_MAX3_V1; no es la tabla comercial definitiva. |
+| 7. Despliegue | Frontend/portal/backoffice/API desplegados, HTTPS/readiness200, runtime recreado y rollback/restauración con dos imágenes schema7 verificados. La aceptación integral real con tiquetera/banco/correo sigue pendiente de caso y GO. |
+
+Entradas: [cuotas](https://plugin.prestaya-latam.com/mis-cuotas), [backoffice propio](https://plugin.prestaya-latam.com/backoffice/ticketeras), [API ready](https://api-tickets.prestaya-latam.com/health/ready). `tickets.prestaya-latam.com` redirige al portal. No quedan registros IONOS pendientes.
+
+Ambos repositorios tienen dev y main alineados para seguir con squash a dev y merge a main. CI/publicación automáticas; promoción propia diaria04:00 Bolivia o mediante el ejecutor manual fijo con AWS autorizado. Variables privadas únicamente en Secrets Manager; el frontend conserva solo su URL pública de API. Las instrucciones personales/administrativas y scripts están en [la guía de operadores](https://github.com/Presto-Ya-Team/meteor-stack-core/blob/main/docs/ticketya/operator-production-guide.md).
