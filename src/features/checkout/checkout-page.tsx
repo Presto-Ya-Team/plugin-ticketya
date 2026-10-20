@@ -170,7 +170,7 @@ function CheckoutFlow({ order, token, expiresAt }: { order: TicketOrder; token: 
                 </Card>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <CheckCheck className="size-4 text-primary" />
-                  {financingPlan ? `Intereses de prueba incluidos: ${money(financingPlan.interestMinor)}` : order.plan.feesMinor === 0 ? "Sin recargos" : `Recargos: ${money(order.plan.feesMinor)}`} · Plan de tu orden
+                  {financingPlan ? `Intereses incluidos: ${money(financingPlan.interestMinor)}` : order.plan.feesMinor === 0 ? "Sin recargos" : `Recargos: ${money(order.plan.feesMinor)}`} · Plan de tu orden
                 </div>
                 <FinancingBreakdown plan={order.plan} />
                 <Card className="gap-0 border-border/80 py-0 shadow-none">
@@ -291,7 +291,7 @@ function CheckoutFlow({ order, token, expiresAt }: { order: TicketOrder; token: 
                       className="block text-xs font-normal leading-5"
                     >
                       He revisado y acepto el anticipo, las cuotas, sus fechas previstas
-                      y los intereses indicados. Entiendo que el pago se hará en BCP sandbox.
+                      y los intereses indicados. Entiendo que el pago se hará mediante QR BCP.
                     </Label>
                   </div>
                   {form.formState.errors.accepted && (
@@ -378,7 +378,7 @@ function CheckoutFlow({ order, token, expiresAt }: { order: TicketOrder; token: 
                   <Info className="mt-0.5 size-4 shrink-0 text-primary" />
                   <p>
                     Al pagar solicitaremos a BCP el QR de tu anticipo en bolivianos.
-                    El pago solo se registrará tras la confirmación bancaria. Estamos usando el ambiente sandbox.
+                    El pago solo se registrará tras la confirmación bancaria.
                   </p>
                 </div>
                 <CheckoutActions expiresAt={expiresAt}>

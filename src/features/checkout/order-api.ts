@@ -26,7 +26,7 @@ const financingPlan = z.object({
     scheduleState: z.enum(["ESTIMATED_UNTIL_DOWN_PAYMENT_CONFIRMED", "CONFIRMED", "REQUIRES_REVIEW"]),
     confirmedAt: z.iso.datetime({ offset: true }).optional(),
     lastScheduledDate: z.iso.date(), schedulerVersion: z.string(), rounding: z.string(),
-    environment: z.enum(["LOCAL_TEST", "NON_PRODUCTION_TEST"]),
+    environment: z.enum(["LOCAL_TEST", "NON_PRODUCTION_TEST", "PRODUCTION_INITIAL"]),
   }),
 });
 export const ticketOrderSchema = z.object({

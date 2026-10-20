@@ -1,5 +1,13 @@
 # Ticketya Cuotas
 
+El checkout y «Mis cuotas» aceptan planes `PRODUCTION_INITIAL` del backend propio
+del plugin, además de los planes anteriores. La política inicial es 2 % por cuota
+y hasta tres cuotas financiadas, además del anticipo; el navegador muestra los
+valores persistidos en cada orden. La configuración y activación se describen en
+[operación inicial del backend](https://github.com/Presto-Ya-Team/meteor-stack-core/blob/main/docs/ticketya/initial-production.md).
+Los textos generales no suponen que todo cobro sea sandbox; el diálogo QR muestra
+el ambiente de prueba cuando así lo devuelve el servidor.
+
 Checkout para pagar entradas en cuotas. React, TypeScript, Vite, Tailwind, shadcn/ui (Ocean Breeze), React Router y React Hook Form con Zod. El proyecto vive directamente en esta carpeta.
 
 ## Desarrollo local

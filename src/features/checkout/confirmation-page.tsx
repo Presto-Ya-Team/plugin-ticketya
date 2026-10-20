@@ -27,7 +27,7 @@ function Confirmation({ order, token }: { order: TicketOrder; token: string }) {
           <Check className="size-8" />
         </span>
         <Badge variant="secondary" className="mb-4">
-          Anticipo confirmado · BCP sandbox
+          Anticipo confirmado · BCP
         </Badge>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
           ¡Anticipo recibido{name ? `, ${name}` : ""}!
@@ -50,7 +50,7 @@ function Confirmation({ order, token }: { order: TicketOrder; token: string }) {
       <p className="mb-6 text-center text-xs leading-5 text-muted-foreground">
         {order.status === "PAYMENT_REVIEW_REQUIRED"
           ? "Recibimos tu pago, pero el calendario necesita revisión porque cambió respecto del aceptado. Conservamos las condiciones de tu cotización; soporte debe resolverlo antes de continuar."
-          : "Tu calendario fue validado con la fecha del pago. Esta confirmación corresponde al sandbox de BCP; la emisión de la entrada se gestiona por separado."}
+          : "Tu calendario fue validado con la fecha del pago. La emisión de la entrada se gestiona por separado."}
       </p>
       <Button asChild className="mb-3 h-12 w-full rounded-xl"><Link to="/mis-cuotas" target="_blank" rel="noopener noreferrer">Ver mis cuotas</Link></Button>
       <Button

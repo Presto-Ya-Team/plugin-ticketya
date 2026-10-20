@@ -61,7 +61,7 @@ function Layout() {
               variant="secondary"
               className="hidden gap-1.5 sm:inline-flex"
             >
-              <Sparkles className="size-3" /> BCP sandbox
+              <Sparkles className="size-3" /> Pagos con BCP
             </Badge>
             <Dialog>
               <DialogTrigger asChild>
@@ -88,15 +88,15 @@ function Layout() {
                       planes tienen un anticipo del 25% del precio original y
                       cuotas financiadas con al menos 7 días entre pagos, hasta
                       la víspera del evento. El anticipo va aparte de las cuotas.
-                      La tasa y el máximo utilizados aquí son valores de prueba.
+                      La tasa y la cantidad de cuotas se muestran en el plan de tu orden.
                     </p>
                   </div>
                   <div>
                     <h3 className="font-semibold">¿Se cobrará algo?</h3>
                     <p className="text-muted-foreground">
-                      El QR se solicita a BCP en su ambiente sandbox. Solo
-                      registramos el anticipo tras verificar la confirmación bancaria.
-                      Esta integración todavía no emite entradas ni opera en producción.
+                      El QR de BCP cobra el importe que se muestra en pantalla.
+                      Los pagos se registran tras verificar la confirmación bancaria.
+                      El QR de pago no es una entrada de acceso al evento.
                     </p>
                   </div>
                   <div>
@@ -138,7 +138,7 @@ function Layout() {
                 Esta página no está disponible
               </h1>
               <p className="my-5 text-muted-foreground">
-                Vuelve al pago para continuar con la demostración.
+                Vuelve al pago para continuar con tu compra.
               </p>
               <Button asChild>
                 <Link to={paymentPath}>
@@ -151,7 +151,7 @@ function Layout() {
       </Routes>
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 border-t px-5 py-7 text-xs text-muted-foreground sm:flex-row sm:px-8">
         <p>© 2026 Ticketya Cuotas · Más experiencias, a tu ritmo.</p>
-        <p>BCP sandbox · Entorno de pruebas</p>
+        <p>Pagos mediante QR BCP</p>
       </footer>
     </div>
   );

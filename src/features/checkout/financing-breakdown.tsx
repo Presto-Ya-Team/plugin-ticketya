@@ -22,7 +22,7 @@ export function FinancingBreakdown({ plan }: { plan: TicketOrder["plan"] }) {
         </div>)}
       </dl>
       <p className="mt-4 text-xs leading-5 text-muted-foreground">
-        Tasa de prueba: {plan.snapshot.interestRateBps / 100}% por cuota financiada,
+        {plan.snapshot.environment === "PRODUCTION_INITIAL" ? "Tasa inicial" : "Tasa de prueba"}: {plan.snapshot.interestRateBps / 100}% por cuota financiada,
         calculada sobre el precio de la entrada al comprar. Pagar antes no reduce los intereses.
       </p>
     </CardContent>

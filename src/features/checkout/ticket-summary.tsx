@@ -86,7 +86,7 @@ export function TicketSummary({ order }: { order: TicketOrder }) {
           <p className="font-medium">Todo claro desde el principio</p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
             Revisa los importes y las fechas antes de confirmar. Todas las
-            fechas corresponden al plan guardado en tu orden. El cobro se realiza mediante BCP sandbox.
+            fechas corresponden al plan guardado en tu orden. El cobro se realiza mediante QR BCP.
           </p>
         </div>
       </div>
