@@ -84,7 +84,10 @@ Usa el mismo hostname en ambos servidores. Al compilar producción hereda la URL
 pública de la API, sin añadir secretos al frontend.
 
 El backend necesita correo configurado: modo `local` solo en desarrollo, leyendo
-el archivo privado del código, o SES con remitente/rol propios verificados. El
+el archivo privado del código, o Resend con `PLUGIN_BUYER_EMAIL_MODE=resend`,
+`PLUGIN_BUYER_EMAIL_FROM` y `PLUGIN_BUYER_RESEND_API_KEY` en el secreto del backend.
+Se puede usar la cuenta Resend existente de Meteor; códigos y sesiones permanecen
+separados. SES sigue como alternativa. Ninguna clave de correo va en Vite. El
 frontend no implementa códigos de prueba ni datos ficticios; si falta configurar
 el servidor, muestra que el acceso todavía no está disponible. El contrato y las
 variables están en `meteor-stack-core/docs/ticketya/plugin-buyer-portal.md`.
