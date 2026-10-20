@@ -13,7 +13,7 @@ const listSchema = z.object({ items: z.array(ticketera) });
 const createdSchema = z.object({ ticketera, credential: z.object({ clientId: z.string(), secret: z.string() }) });
 type Session = z.infer<typeof sessionSchema>;
 type Ticketera = z.infer<typeof ticketera>;
-class ApiError extends Error { constructor(message: string, readonly status: number) { super(message); } }
+class ApiError extends Error { readonly status: number; constructor(message: string, status: number) { super(message); this.status = status; } }
 async function request<T>(path: string, schema: z.ZodType<T>, options: RequestInit = {}): Promise<T> {
   if (!api) throw new ApiError("El acceso de operadores todavía no está configurado.", 503);
   const response = await fetch(api + "/api/v1/operators" + path, { ...options, credentials: "include", cache: "no-store",
