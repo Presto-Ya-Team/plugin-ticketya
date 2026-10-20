@@ -16,7 +16,7 @@ with tempfile.TemporaryDirectory() as directory:
  current=json.loads(state.read_text()) if r.returncode==0 else None
  version=hashlib.sha256(pathlib.Path('dist.tgz').read_bytes()).hexdigest()
  aws(['s3api','put-object','--bucket',BUCKET,'--key','releases/plugin/'+sha+'/dist.tgz','--body','dist.tgz','--metadata','sha256='+version])
- value={'product':'ticketya','component':'plugin','repository':'Presto-Ya-Team/plugin-ticketya','branch':'main','source_sha':sha,'checks':'passed','version':version,'base_version':current['version'] if current else None}
+ value={'product':'ticketya','application_code':'plugin-ticketya','component':'plugin','repository':'Presto-Ya-Team/plugin-ticketya','branch':'main','source_sha':sha,'checks':'passed','version':version,'base_version':current['version'] if current else None}
  path=pathlib.Path(directory)/'queue.json';path.write_text(json.dumps(value))
  aws(['s3api','put-object','--bucket',BUCKET,'--key','queue/plugin.json','--body',str(path),'--content-type','application/json'])
  print(json.dumps({'queued':sha,'archive_sha256':version,'activation':'daily04:00 America/La_Paz or guarded manual executor'}))

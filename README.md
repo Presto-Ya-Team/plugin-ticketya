@@ -107,6 +107,13 @@ Al desplegar, configura el hosting para servir `index.html` en `/pago`, `/confir
 
 ## Producción TicketYa
 
+La identidad lógica de esta integración es **`plugin-ticketya`**. Los nombres
+físicos históricos `ticketya-production` del bucket/roles/host no identifican otra
+aplicación ni se renombran al publicar. El manifiesto añade `application_code` y
+mantiene el sobre de transporte anterior para los estáticos ya desplegados.
+La revisión y las comprobaciones de aislamiento están documentadas en
+`meteor-stack-core/docs/ticketya/plugin-application-boundary.md`.
+
 El workflow `.github/workflows/ticketya-production.yml` valida y construye cada candidato, con `VITE_TICKET_API_BASE_URL=https://api-tickets.prestaya-latam.com` al compilar. Un push/merge a main publica el artefacto identificado por SHA y encola su versión. El rol solo publica el prefijo plugin; no puede ejecutar shell, leer secretos del runtime ni desplegar PrestaYa.
 
 El host TicketYa activa los estáticos de forma atómica en la ventana diaria04:00 Bolivia o mediante el ejecutor manual autorizado, con la misma exclusión y comprobación de base. Sin candidato pendiente no cambia el servicio. Un despliegue manual consumido no se repite en la siguiente ventana.

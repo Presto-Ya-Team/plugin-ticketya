@@ -1,5 +1,11 @@
 # Preparación local TicketYa V1 — plugin
 
+Nota actual: este es un plan histórico. El portal se implementa en **Plugin TicketYa**,
+`https://plugin.prestaya-latam.com/mis-cuotas`, y el backend identifica la aplicación
+como `plugin-ticketya`. Los nombres físicos `ticketya-production` se conservan.
+Ver README y `meteor-stack-core/docs/ticketya/plugin-application-boundary.md` para
+el contrato actual y el límite de la verificación de infraestructura.
+
 Actualización T-07: mínimo propio seleccionado, plan previo a ejecución; sin estimación de tráfico y crecimiento de capacidad requerido. Los archivos/promociones plugin son independientes de Meteor. Plan detallado en el worktree Meteor `docs/ticketya/v1-minimum-execution-plan.md`.
 
 Dominios T-02: el usuario fijó `https://plugin.prestaya-latam.com` para este checkout y `https://tickets.prestaya-latam.com` para el portal de cuotas en Meteor. Permitió API en app o subdominio similar: se selecciona como configuración preparada `https://api-tickets.prestaya-latam.com` para apuntar al runtime TicketYa propio, conservando las dependencias financieras centrales identificadas. DNS/TLS/destino todavía no aplicados. `.env.production.example` y el default de la plantilla build incluyen ese origen; se usa sin `/api/v1` porque el cliente agrega las rutas. El dominio de alojamiento del plugin no es el valor de su variable API.
