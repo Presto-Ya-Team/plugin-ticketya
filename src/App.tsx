@@ -26,6 +26,7 @@ const ConfirmationPage = lazy(() =>
   })),
 );
 const BuyerPortal = lazy(() => import("@/features/buyer/buyer-portal").then(module => ({ default: module.BuyerPortal })));
+const OperatorBackoffice = lazy(() => import("@/features/operators/operator-backoffice").then(module => ({ default: module.OperatorBackoffice })));
 
 function Layout() {
   const { pathname, search } = useLocation();
@@ -159,7 +160,11 @@ function Layout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Layout />
+      <Routes>
+        <Route path="/backoffice" element={<Navigate to="/backoffice/ticketeras" replace />} />
+        <Route path="/backoffice/ticketeras" element={<Suspense fallback={<p role="status">Cargando administración…</p>}><OperatorBackoffice /></Suspense>} />
+        <Route path="*" element={<Layout />} />
+      </Routes>
     </BrowserRouter>
   );
 }

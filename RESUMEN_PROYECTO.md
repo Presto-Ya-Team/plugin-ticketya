@@ -463,3 +463,9 @@ Los contratos y procedimientos detallados están en `meteor-stack-core/docs/tick
 - [Operación y despliegue](https://github.com/Presto-Ya-Team/meteor-stack-core/blob/main/docs/ticketya/production-operations.md).
 
 El frontend incluye además su [README](README.md). Para implementar la siguiente etapa, partir de estos contratos y del código actual, y actualizar las condiciones únicamente después de resolver las decisiones comerciales pendientes.
+
+## Operadores: acceso de producción
+
+Se añadió `/backoffice/ticketeras` como interfaz mínima de las API de operadores existentes: ingreso federado con contraseña/MFA, listado, alta de tiqueteras por admin y salida del plugin. Requiere grant exclusivo `plugin-ticketya` (aplicación/tenant/ambiente exactos). No concede principal de PrestaYa. El operador inicial tiene operations+admin solo en ese scope. Credenciales de tiqueteras aparecen una vez, sin almacenamiento persistente en el navegador.
+
+Guía y scripts personales/administrativos: `meteor-stack-core/docs/ticketya/operator-production-guide.md`. El frontend sigue usando únicamente `VITE_TICKET_API_BASE_URL`; ningún secreto del runtime va en Vite. El despliegue técnico permite configurar la infraestructura conservando cerradas las operaciones financieras y `/health/ready` con sus bloqueos pendientes.
