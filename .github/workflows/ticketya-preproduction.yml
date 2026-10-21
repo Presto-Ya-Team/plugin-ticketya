@@ -1,0 +1,65 @@
+name: TicketYa plugin preproduction
+on:
+  pull_request:
+  push:
+    branches: [dev]
+permissions:
+  contents: read
+concurrency:
+  group: ticketya-preproduction-plugin-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  publication-contract:
+    runs-on: ubuntu-24.04
+    env:
+      VITE_TICKET_API_BASE_URL: https://preprod-api-tickets.prestaya-latam.com
+      VITE_DEPLOYMENT_ENV: preproduction
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m unittest discover -s scripts/tests -p 'test_preproduction.py' -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - name: Package exact static candidate
+        run: tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf dist.tgz -C dist .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ticketya-preproduction-plugin-${{ github.sha }}
+          path: dist.tgz
+          retention-days: 14
+  build-publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: publication-contract
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VITE_TICKET_API_BASE_URL: https://preprod-api-tickets.prestaya-latam.com
+      VITE_DEPLOYMENT_ENV: preproduction
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ticketya-preproduction-plugin-${{ github.sha }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::040084234234:role/prestaya-preproduction-plugin-publish
+          aws-region: us-east-1
+      - name: Queue only own preproduction release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: python3 scripts/publish-preproduction.py
