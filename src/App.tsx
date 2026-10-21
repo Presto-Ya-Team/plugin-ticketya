@@ -160,6 +160,7 @@ function Layout() {
 export default function App() {
   return (
     <BrowserRouter>
+      {import.meta.env.VITE_DEPLOYMENT_ENV === "preproduction" && <div role="note" className="bg-amber-100 px-4 py-2 text-center text-sm text-amber-950">Preproducción · Entorno de validación</div>}
       <Routes>
         <Route path="/backoffice" element={<Navigate to="/backoffice/ticketeras" replace />} />
         <Route path="/backoffice/ticketeras" element={<Suspense fallback={<p role="status">Cargando administración…</p>}><OperatorBackoffice /></Suspense>} />
