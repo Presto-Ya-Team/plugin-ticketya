@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   buyerSchema,
+  money,
   type Buyer,
 } from "./checkout-utils";
 import { createPreviewOrder } from "./preview-order";
@@ -118,7 +119,9 @@ function CheckoutFlow({ order, token, expiresAt, preview = false }: { order: Tic
             {step === 0 && (
               <div className="space-y-6">
                 <PaymentPlan order={order} />
-                <details className="plan-conditions"><summary>Ver condiciones de financiación</summary><div className="pt-4"><FinancingBreakdown plan={order.plan} /><p className="mt-3 text-xs leading-5 text-muted-foreground">{financing ? "Fechas previstas: se validarán al confirmar el anticipo. Al menos 7 días entre pagos y última cuota como máximo en la víspera del evento." : "Estas son las fechas guardadas para tu orden."} Los vencimientos se muestran en la hora del evento.</p></div></details>
+                <details className="plan-conditions"><summary>Ver condiciones de financiación</summary><div className="pt-4"><FinancingBreakdown plan={order.plan} /><p className="mt-3 text-xs leading-5 text-muted-foreground">{financing ? "Fechas previstas: se validarán al confirmar el anticipo. Al menos 7 días entre pagos y última cuota como máximo en la víspera del evento." : "Estas son las fechas guardadas para tu orden."} Los vencimientos se muestran en la hora del evento.</p>
+                  {order.arrearsPolicy && <p className="mt-3 text-xs leading-5 text-muted-foreground">Mora desde el día siguiente al vencimiento: {order.arrearsPolicy.simpleRateBps / 100}% del precio contractual. Con dos o más cuotas vencidas, una mora agravada del {order.arrearsPolicy.aggravatedRateBps / 100}% sustituye los recargos ordinarios pendientes. El día del evento, el cargo es {order.arrearsPolicy.eventCharge.kind === "FIXED" ? money(order.arrearsPolicy.eventCharge.amountMinor) : `${order.arrearsPolicy.eventCharge.rateBps / 100}% del precio contractual`}. Tope acumulado de multas pagadas y pendientes: {money(order.arrearsPolicy.globalCapMinor)}. Se conserva todo lo pagado. Puedes regularizar hasta la hora de inicio del evento.</p>}
+                </div></details>
                 <CheckoutActions expiresAt={expiresAt}>
                 <Button
                   size="lg"
@@ -216,7 +219,7 @@ function CheckoutFlow({ order, token, expiresAt, preview = false }: { order: Tic
                       className="block text-xs font-normal leading-5"
                     >
                       He revisado y acepto el anticipo, las cuotas, sus fechas previstas
-                      y los intereses indicados.
+                      y los intereses indicados{order.arrearsPolicy ? ", así como las condiciones de mora mostradas en el plan." : "."}
                     </Label>
                   </div>
                   {form.formState.errors.accepted && (

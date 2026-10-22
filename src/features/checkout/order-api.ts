@@ -46,6 +46,13 @@ export const ticketOrderSchema = z.object({
   totalPayableMinor: amount.optional(),
   paidAmountMinor: amount,
   outstandingAmountMinor: amount,
+  arrearsPaidMinor: amount.optional(),
+  arrearsPendingMinor: amount.optional(),
+  arrearsPolicy: z.object({
+    version: z.string().min(1), simpleRateBps: z.number().int().min(0).max(10000), aggravatedRateBps: z.number().int().min(0).max(10000),
+    eventCharge: z.discriminatedUnion("kind", [z.object({ kind: z.literal("FIXED"), amountMinor: amount }), z.object({ kind: z.literal("RATE"), rateBps: z.number().int().min(0).max(10000) })]),
+    globalCapMinor: amount, regularizationCutoff: z.literal("EVENT_START").optional(),
+  }).optional(),
   status: z.string(),
   plan: z.discriminatedUnion("ruleVersion", [legacyPlan, financingPlan]),
   createdAt: z.iso.datetime({ offset: true }),
@@ -97,6 +104,11 @@ export function checkoutPath(token: string) {
 
 export const paymentResponseSchema = z.object({
   provider: z.literal("BCP"), environment: z.enum(["sandbox", "production"]), order: ticketOrderSchema,
+  quote: z.object({
+    installmentNumber: z.number().int().positive(), installmentAmountMinor: amount,
+    arrearsAmountMinor: amount, totalAmountMinor: amount, asOf: z.iso.datetime({ offset: true }), policyVersion: z.string().min(1),
+    penalties: z.array(z.object({ chargeId: z.string().min(1), kind: z.enum(["SIMPLE", "AGGRAVATED", "EVENT"]), amountMinor: amount })),
+  }).optional(),
   payment: z.object({
     paymentOrderId: z.string().min(1),
     status: z.enum(["requested", "processing", "qr_ready", "paid", "expired", "cancelled", "failed", "review_required"]),
@@ -104,7 +116,12 @@ export const paymentResponseSchema = z.object({
     providerPaymentId: z.string().optional(), qrImageBase64: z.string().min(1).max(2_100_000).optional(),
     paidAt: z.iso.datetime({ offset: true }).optional(),
   }).nullable(),
-});
+}).refine(value => !value.quote || (
+  BigInt(value.quote.installmentAmountMinor) + BigInt(value.quote.arrearsAmountMinor) === BigInt(value.quote.totalAmountMinor)
+  && value.quote.penalties.reduce((sum, item) => sum + BigInt(item.amountMinor), 0n) === BigInt(value.quote.arrearsAmountMinor)
+  && (!value.payment || value.payment.amountMinor === value.quote.totalAmountMinor)
+  && value.order.plan.installments.some(row => row.number === value.quote!.installmentNumber && row.amountMinor === value.quote!.installmentAmountMinor)
+), "El desglose de la cuota y la mora no es válido.");
 export type CheckoutPayment = z.infer<typeof paymentResponseSchema>;
 
 function apiBase() {
