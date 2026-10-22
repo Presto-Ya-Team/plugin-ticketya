@@ -102,20 +102,6 @@ function Layout() {
         <Route path="/pago" element={<CheckoutPage />} />
         <Route path="/mis-cuotas/:orderId?" element={<Suspense fallback={<p role="status" className="px-6 py-20 text-center">Cargando tus cuotas…</p>}><BuyerPortal /></Suspense>} />
         <Route
-          path="/confirmacion"
-          element={
-            <Suspense
-              fallback={
-                <p role="status" className="px-6 py-20 text-center">
-                  Cargando confirmación…
-                </p>
-              }
-            >
-              <ConfirmationPage />
-            </Suspense>
-          }
-        />
-        <Route
           path="*"
           element={
             <main className="mx-auto max-w-lg px-6 py-24 text-center">
@@ -145,6 +131,20 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/confirmacion"
+          element={
+            <Suspense
+              fallback={
+                <p role="status" className="px-6 py-20 text-center">
+                  Cargando confirmación…
+                </p>
+              }
+            >
+              <ConfirmationPage />
+            </Suspense>
+          }
+        />
         <Route path="/backoffice" element={<Navigate to="/backoffice/ticketeras" replace />} />
         <Route path="/backoffice/ticketeras" element={<Suspense fallback={<p role="status">Cargando administración…</p>}><OperatorBackoffice /></Suspense>} />
         <Route path="*" element={<Layout />} />
