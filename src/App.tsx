@@ -1,4 +1,4 @@
-import { ArrowUpRight, CircleHelp, Ticket, Sparkles } from "lucide-react";
+import { ArrowUpRight, CircleHelp } from "lucide-react";
 import { lazy, Suspense, useEffect } from "react";
 import {
   BrowserRouter,
@@ -8,7 +8,6 @@ import {
   Routes,
   useLocation,
 } from "react-router";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,32 +36,18 @@ function Layout() {
     window.scrollTo(0, 0);
   }, [pathname]);
   return (
-    <div className={`min-h-screen ${pathname === "/pago" && token ? "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-0" : ""}`}>
+    <div className={`min-h-screen ${pathname === "/pago" ? "prestaya-shell" : ""} ${pathname === "/pago" && (token || (import.meta.env.DEV && new URLSearchParams(search).get("preview") === "plan")) ? "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-0" : ""}`}>
       <header className="border-b bg-card">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-5 sm:px-8">
           <Link
             to={inPortal ? "/mis-cuotas" : paymentPath}
-            aria-label="Ticketya Cuotas, inicio"
-            className="flex items-center gap-2.5"
+            aria-label="Presta Ya, inicio"
+            className="flex shrink-0 items-center"
           >
-            <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Ticket className="size-6 -rotate-12" />
-            </span>
-            <span className="text-xl font-extrabold tracking-tight">
-              ticketya<span className="text-primary">.</span>
-              <span className="ml-2 border-l pl-2 text-sm font-medium text-muted-foreground">
-                cuotas
-              </span>
-            </span>
+            <img src="/prestaya-logo.png" alt="Presta Ya" width={146} height={32} className="h-auto w-32 object-contain sm:w-[146px]" />
           </Link>
           <div className="flex items-center gap-2 sm:gap-4">
             <Button asChild variant={inPortal ? "secondary" : "ghost"} size="sm"><Link to="/mis-cuotas" target={inPortal ? undefined : "_blank"} rel="noopener noreferrer" aria-current={inPortal ? "page" : undefined}>Mis cuotas</Link></Button>
-            <Badge
-              variant="secondary"
-              className="hidden gap-1.5 sm:inline-flex"
-            >
-              <Sparkles className="size-3" /> Pagos con BCP
-            </Badge>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm">
@@ -151,7 +136,6 @@ function Layout() {
       </Routes>
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 border-t px-5 py-7 text-xs text-muted-foreground sm:flex-row sm:px-8">
         <p>© 2026 Ticketya Cuotas · Más experiencias, a tu ritmo.</p>
-        <p>Pagos mediante QR BCP</p>
       </footer>
     </div>
   );

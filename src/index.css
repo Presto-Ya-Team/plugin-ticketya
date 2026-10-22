@@ -231,3 +231,90 @@
     border-radius: 4px;
   }
 }
+/* Payment plan and buyer portal: Presta Ya visual identity. */
+.prestaya-shell {
+  background: #fffafa;
+  color: #172235;
+  --primary: #008568;
+  --primary-foreground: #fff;
+  --muted-foreground: #6d7c93;
+  --border: #e7edf2;
+  --accent: #e8f7f0;
+  --ring: #009c79;
+}
+.prestaya-header { background: #fffafa; }
+.plan-page-title { font-size: clamp(1.6rem, 3vw, 2rem); font-weight: 850; line-height: 1.2; letter-spacing: -.045em; }
+.plan-back { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 8px; color: #008568; font-size: 12px; font-weight: 600; }
+.payment-page-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: clamp(32px, 8vw, 120px); align-items: start; }
+.payment-page-grid > * { min-width: 0; }
+.payment-plan-card { padding: 24px; background: white; border: 1px solid #e7edf2; border-radius: 22px; box-shadow: 0 4px 12px #17223504; }
+.payment-plan-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-bottom: 22px; margin-bottom: 20px; border-bottom: 1px solid #f2f5f8; }
+.payment-plan-heading h2 { font-size: 15px; font-weight: 800; }
+.payment-plan-heading p { font-size: 11px; color: #6d7c93; }
+.payment-plan-heading strong { color: #172235; font-size: 13px; }
+.payment-plan-list { display: grid; gap: 13px; }
+.payment-plan-row { display: flex; align-items: center; gap: 13px; padding: 18px 16px; border: 1px solid #e7edf2; border-radius: 14px; }
+.payment-plan-row.is-next { background: #f3fbf7; border-color: #88e8bf; }
+.payment-plan-number { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 35px; height: 35px; border-radius: 50%; background: #edf2f4; color: #617486; font-size: 13px; font-weight: 700; }
+.payment-plan-number.is-paid { background: #009f79; color: white; }
+.is-next .payment-plan-number { background: #04BE89; color: white; }
+.payment-plan-label { min-width: 0; flex: 1; }
+.payment-plan-label h3 { font-size: 13px; font-weight: 800; }
+.payment-plan-label time { display: block; margin-top: 3px; font-size: 11px; color: #6d7c93; }
+.payment-plan-amount { text-align: right; }
+.payment-plan-amount > div { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.payment-plan-amount strong { font-size: 13px; white-space: nowrap; font-weight: 800; }
+.payment-status { display: inline-block; border-radius: 999px; padding: 3px 10px; background: #ffecd4; color: #a54c0b; font-size: 10px; font-weight: 700; }
+.payment-status.is-paid { background: #d0f8e6; color: #007a58; }
+.payment-status.is-overdue { background: #fee5e4; color: #b32424; }
+.payment-plan-pay { margin-top: 9px; width: 100%; height: 28px; border-radius: 999px; background: #193f49; color: white; font-size: 10px; box-shadow: 0 2px 4px #193f4920; }
+.payment-plan-pay:hover { background: #265763; }
+.payment-plan-progress { margin: 15px 6px 0; color: #6d7c93; font-size: 12px; }
+.payment-plan-progress strong { color: #38465a; font-weight: 500; }
+.order-sidebar { display: grid; gap: 20px; }
+.prestaya-brand-card { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 154px; border-radius: 12px; background: #193e49; padding: 22px; color: white; }
+.prestaya-brand-card img { width: 180px; height: 66px; object-fit: contain; filter: brightness(0) invert(1); }
+.prestaya-brand-card p { margin-top: 9px; font-size: 10px; color: #dce8ec; }
+.order-summary-card { padding: 28px; border: 1px solid #eee9e9; border-radius: 12px; background: #fffcfc; box-shadow: 0 18px 30px #23323c06; }
+.order-summary-card h2 { font-size: 18px; font-weight: 750; letter-spacing: -.04em; color: #292929; }
+.order-summary-event { display: flex; align-items: center; gap: 13px; margin: 28px 0 36px; }
+.order-event-icon { display: flex; width: 64px; height: 70px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 10px; background: linear-gradient(145deg, #143844, #087e70); color: #c0f5df; }
+.order-summary-event h3 { font-size: 13px; font-weight: 750; line-height: 1.4; overflow-wrap: anywhere; }
+.order-summary-event p { margin-top: 3px; font-size: 11px; color: #288976; }
+.order-summary-event .order-summary-venue { text-transform: uppercase; font-size: 10px; font-weight: 600; }
+.order-summary-lines { display: grid; gap: 13px; font-size: 12px; }
+.order-summary-lines > div { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.order-summary-lines dt { color: #288976; overflow-wrap: anywhere; }
+.order-summary-lines dd { flex-shrink: 0; color: #4a4a4a; }
+.order-summary-lines .order-summary-total { padding-top: 14px; border-top: 1px solid #eee9e9; font-weight: 700; }
+.order-summary-note { margin-top: 25px; text-align: center; color: #288976; font-size: 10px; line-height: 1.7; }
+.order-summary-reference { margin-top: 12px; color: #6d7c93; font-size: 10px; text-align: center; overflow-wrap: anywhere; }
+.plan-conditions { font-size: 12px; color: #52667a; }
+.plan-conditions summary { cursor: pointer; }
+@media (max-width: 900px) {
+  .payment-page-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .order-sidebar { grid-template-columns: minmax(0, 1fr); align-items: start; }
+}
+@media (max-width: 540px) {
+  .payment-plan-card { padding: 16px; border-radius: 18px; }
+  .payment-plan-row { flex-wrap: wrap; padding: 14px 12px; gap: 10px; }
+  .payment-plan-label { flex-basis: calc(100% - 45px); }
+  .payment-plan-amount { width: 100%; padding-left: 45px; }
+  .payment-plan-amount > div { justify-content: space-between; }
+  .payment-plan-pay { height: 36px; font-size: 12px; }
+  .order-sidebar { grid-template-columns: minmax(0, 1fr); }
+  .order-summary-card { padding: 24px; }
+}
+.inline-qr-card { display: grid; gap: 20px; padding: 24px 36px; border: 1px solid #dedede; border-radius: 14px; background: #fffcfc; }
+.inline-qr-image { width: min(100%, 256px); margin: 0 auto; padding: 20px; border: 1px solid #64e3be; border-radius: 42px; background: white; }
+.inline-qr-image img, .inline-qr-image svg { display: block; width: 100%; height: auto; }
+.inline-qr-timer { display: flex; justify-content: center; align-items: center; gap: 16px; justify-self: center; padding: 6px 18px; border-radius: 999px; background: #f0f2f1; color: #288976; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.inline-qr-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; background: #eaf8f5; border: 1px solid #d7f2e9; border-radius: 12px; color: #288976; }
+.inline-qr-total p { font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+.inline-qr-total strong { font-size: 26px; font-weight: 900; color: #172235; }
+.inline-qr-actions { display: flex; justify-content: space-around; align-items: center; gap: 12px; }
+@media (max-width: 540px) { .inline-qr-card { padding: 20px 16px; } .inline-qr-actions { flex-wrap: wrap; } }
+
+@media (min-width: 901px) {
+  .order-sidebar { position: sticky; top: 24px; align-self: start; max-height: calc(100dvh - 48px); overflow-y: auto; scrollbar-width: thin; }
+}

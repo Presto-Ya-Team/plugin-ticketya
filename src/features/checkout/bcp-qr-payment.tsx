@@ -1,17 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { LoaderCircle, QrCode, RefreshCw } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Clock3, Copy, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CheckoutError, requestCheckoutPayment, type CheckoutPayment } from "./order-api";
-import { eventDateTime, money } from "./checkout-utils";
-import { SessionCountdown } from "./session-countdown";
+import { money } from "./checkout-utils";
 
-export function BcpQrPayment({ amountMinor, token, buyer, termsVersion, expiresAt, onConfirmed }: {
+export function BcpQrPayment({ amountMinor, token, buyer, termsVersion, expiresAt, onConfirmed, onCancel, preview = false }: {
   amountMinor: number; token: string; buyer: { name: string; email: string; phone: string };
-  termsVersion: string | undefined; expiresAt: string; onConfirmed: () => void;
+  termsVersion: string | undefined; expiresAt: string; onConfirmed: () => void; onCancel: () => void; preview?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [previewExpiresAt] = useState(() => Date.now() + 300_000);
+  const [notice, setNotice] = useState("");
   const [result, setResult] = useState<CheckoutPayment | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -20,13 +18,12 @@ export function BcpQrPayment({ amountMinor, token, buyer, termsVersion, expiresA
   const confirmRef = useRef(onConfirmed);
   useEffect(() => { confirmRef.current = onConfirmed; }, [onConfirmed]);
   useEffect(() => {
-    if (!open) return;
     const interval = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(interval);
-  }, [open]);
+  }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (preview) return;
     let active = true;
     let poll: number | undefined;
     const controller = new AbortController();
@@ -36,6 +33,7 @@ export function BcpQrPayment({ amountMinor, token, buyer, termsVersion, expiresA
       setError(null);
       timeout = window.setTimeout(() => controller.abort(), 40_000);
       try {
+        if (initial && Date.parse(expiresAt) <= Date.now()) throw new CheckoutError("Este enlace de pago venció. Solicita uno nuevo.");
         if (!termsVersion) throw new CheckoutError("Esta orden antigua requiere una nueva cotización para pagar con BCP.");
         let response = await requestCheckoutPayment(token, controller.signal);
         const alreadyPaid = response.order.plan.ruleVersion === "TICKET_FINANCING_V3" && response.order.plan.downPayment.status === "PAID";
@@ -62,46 +60,38 @@ export function BcpQrPayment({ amountMinor, token, buyer, termsVersion, expiresA
     }
     void load(true);
     return () => { active = false; controller.abort(); window.clearTimeout(poll); window.clearTimeout(timeout); };
-  }, [open, attempt, token, buyer.name, buyer.email, buyer.phone, termsVersion, amountMinor]);
+  }, [preview, attempt, token, buyer.name, buyer.email, buyer.phone, termsVersion, amountMinor, expiresAt]);
 
   const payment = result?.payment;
   const expired = payment && (payment.status === "expired" || Date.parse(payment.expiresAt) <= now);
   const ready = !expired && payment?.status === "qr_ready" && payment.qrImageBase64;
   const failed = payment && ["failed", "cancelled", "review_required"].includes(payment.status);
-  return <Dialog open={open} onOpenChange={(value) => {
-    setOpen(value);
-    if (value) { setAttempt(0); setResult(null); setError(null); }
-  }}>
-    <DialogTrigger asChild><Button size="lg" className="h-12 w-full rounded-xl">
-      Pagar {money(amountMinor)} <QrCode className="size-4" />
-    </Button></DialogTrigger>
-    <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
-      <DialogHeader className="items-center pt-3 text-center">
-        <Badge variant="secondary">BCP{result?.environment === "sandbox" ? " · Pruebas" : ""}</Badge>
-        <DialogTitle className="text-xl">Paga tu anticipo</DialogTitle>
-        <DialogDescription>El pago se confirmará cuando recibamos la verificación del banco.</DialogDescription>
-      </DialogHeader>
-      <SessionCountdown expiresAt={expiresAt} className="mx-auto w-fit" />
-      <div className="space-y-4 text-center">
-        <p className="text-3xl font-bold text-primary">{money(amountMinor)}</p>
-        {error ? <p role="alert" className="rounded-xl bg-destructive/5 p-4 text-sm text-destructive">{error}</p> : <>
-          {ready && <div className="mx-auto w-fit rounded-2xl border bg-white p-3">
-            <img src={`data:image/png;base64,${payment.qrImageBase64}`} alt="QR BCP para pagar el anticipo" width={240} height={240} className="h-auto max-w-full" />
-          </div>}
-          <p role="status" className="text-sm text-muted-foreground">
-            {expired ? "Este QR venció. Consulta su estado antes de solicitar otro cobro."
-              : failed ? "El cobro no está disponible o requiere revisión. Consulta con soporte antes de volver a pagar."
-              : ready ? "Esperando confirmación de BCP…"
-              : loading ? "Solicitando QR a BCP…"
-              : "BCP está procesando la solicitud. No vuelvas a pagar mientras verificamos el resultado."}
-          </p>
-          {payment && <p className="text-xs text-muted-foreground">Referencia: {payment.paymentOrderId}<br />Vencimiento del QR: {eventDateTime(payment.expiresAt)}</p>}
-        </>}
-        {(error || expired || failed) && <Button variant="outline" className="w-full" disabled={loading} onClick={() => setAttempt((value) => value + 1)}>
-          {loading ? <LoaderCircle className="size-4 animate-spin" /> : <RefreshCw className="size-4" />} Consultar estado
-        </Button>}
-        <p className="text-xs leading-5 text-muted-foreground">Mostrar o escanear el QR no confirma el pago. Puedes cerrar esta ventana: Meteor seguirá recibiendo las confirmaciones del banco.</p>
-      </div>
-    </DialogContent>
-  </Dialog>;
+  const seconds = Math.max(0, Math.ceil(((preview ? previewExpiresAt : Date.parse(payment?.expiresAt ?? expiresAt)) - now) / 1000));
+  const countdown = [Math.floor(seconds / 60), seconds % 60].map(value => String(value).padStart(2, "0")).join(":");
+  async function copyAmount() {
+    try { await navigator.clipboard.writeText((amountMinor / 100).toFixed(2)); setNotice("Importe copiado."); }
+    catch { setNotice("No pudimos copiar el importe."); }
+  }
+  return <div className="inline-qr-card">
+    <div className="inline-qr-image">
+      {preview ? <DemoQr /> : ready ? <img src={`data:image/png;base64,${payment.qrImageBase64}`} alt="QR para pagar el anticipo" width={240} height={240} /> : <div role="status" className="flex min-h-48 items-center justify-center p-6 text-center text-sm text-muted-foreground">{loading ? <><LoaderCircle className="mr-2 size-5 animate-spin" />Preparando QR…</> : expired ? "QR vencido" : failed ? "Pago no disponible" : "Esperando el código QR…"}</div>}
+    </div>
+    <div className="inline-qr-timer" aria-label={`Tiempo restante: ${countdown}`}><Clock3 size={16} /><span>{countdown}</span></div>
+    {!preview && result?.environment === "sandbox" && <p className="text-center text-xs text-muted-foreground">Ambiente de pruebas</p>}
+    {preview && <p className="text-center text-xs text-muted-foreground">QR de demostración · No válido para pagos</p>}
+    <div className="inline-qr-total"><div><p>MONTO DE LA CUOTA INICIAL</p><strong>{money(amountMinor)}</strong></div><Button variant="ghost" size="icon" aria-label="Copiar importe" onClick={() => void copyAmount()}><Copy size={18} /></Button></div>
+    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    {!preview && <p role="status" className="text-center text-xs text-muted-foreground">{expired ? "Este QR venció. Consulta su estado antes de volver a pagar." : failed ? "El cobro no está disponible o requiere revisión. Contacta a soporte." : "El pago se registrará cuando recibamos la confirmación bancaria."}</p>}
+    {notice && <p role="status" className="text-center text-xs text-muted-foreground">{notice}</p>}
+    <div className="inline-qr-actions"><Button className="rounded-full bg-[#04BE89] px-6 font-bold text-white hover:bg-[#03aa7a]" disabled={!preview && loading} onClick={() => { if (preview) setNotice("Esta es una demostración: no se ha realizado ningún pago."); else setAttempt(value => value + 1); }}>{loading && !preview ? <LoaderCircle className="size-4 animate-spin" /> : null}{error || expired || failed ? "Consultar estado" : "Ya realicé el pago"}</Button><Button variant="ghost" className="font-bold text-[#009e72]" onClick={onCancel}>Cancelar</Button></div>
+  </div>;
+}
+function DemoQr() {
+  // Decorative pattern only: no banking or payment payload.
+  const finder = (x: number, y: number) => <g key={x + ":" + y}><rect x={x} y={y} width="7" height="7" /><rect x={x + 1} y={y + 1} width="5" height="5" fill="white" /><rect x={x + 2} y={y + 2} width="3" height="3" /></g>;
+  return <svg viewBox="-2 -2 25 25" role="img" aria-label="QR ficticio de demostración" fill="#04BE89" shapeRendering="crispEdges">
+    <rect x="-2" y="-2" width="25" height="25" fill="white" />
+    {finder(0, 0)}{finder(14, 0)}{finder(0, 14)}
+    {Array.from({ length: 441 }, (_, index) => { const x = index % 21; const y = Math.floor(index / 21); if ((x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12)) return null; return (x * 7 + y * 11 + x * y) % 5 < 3 ? <rect key={index} x={x} y={y} width="1" height="1" /> : null; })}
+  </svg>;
 }
